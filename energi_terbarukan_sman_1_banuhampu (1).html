@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Fisika Energi Terbarukan - SMAN 1 Banuhampu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(229, 231, 235, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .bg-warm-neutral { background-color: #FAF9F6; }
+
+        .quiz-option {
+            transition: all 0.2s ease;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+            padding: 1rem;
+            border-radius: 1rem;
+            border: 2px solid #f1f5f9;
+        }
+
+        .correct-ans { background-color: #065f46 !important; color: white !important; border-color: #064e3b !important; }
+        .wrong-ans { background-color: #ef4444 !important; color: white !important; border-color: #b91c1c !important; }
+
+        .hero-gradient { background: linear-gradient(135deg, #064e3b 0%, #1a2e05 100%); }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #cbd5e0;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px; width: 18px;
+            left: 4px; bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider.solar { background-color: #d97706; }
+        input:checked + .slider.hydro { background-color: #0369a1; }
+        input:checked + .slider:before { transform: translateX(24px); }
+
+        .tts-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 4px;
+            background-color: #d1d5db;
+            padding: 10px;
+            border-radius: 12px;
+            width: fit-content;
+            margin: 0 auto;
+        }
+
+        .tts-cell {
+            width: 36px;
+            height: 36px;
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            font-size: 14px;
+            font-weight: 800;
+            border-radius: 4px;
+        }
+
+        .tts-cell.black { background-color: #1f2937; }
+
+        .tts-input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            text-align: center;
+            background: transparent;
+            outline: none;
+            color: #064e3b;
+            text-transform: uppercase;
+        }
+
+        .tts-input:focus {
+            background-color: #fef3c7;
+            border: 2px solid #d97706;
+            border-radius: 4px;
+        }
+
+        @media print {
+            nav, #printBtn, #checkTTSBtn, .no-print, .controls-container { display: none !important; }
+            body { background-color: white !important; }
+            .glass-card { border: 1px solid #ccc !important; box-shadow: none !important; break-inside: avoid; }
+            .hero-gradient { background: none !important; color: #064e3b !important; border: 3px solid #064e3b !important; }
+            .hero-gradient * { color: #064e3b !important; }
+            .chart-container { max-height: 300px !important; }
+        }
+    </style>
+</head>
+<body class="bg-warm-neutral text-slate-800">
+
+    <!-- Chosen Palette: Forest Gold (Deep Emerald, Amber Gold, and Ivory) -->
+
+    <!-- Application Structure Plan: 
+        1. Brand Header: Identitas resmi Novita Reni, S.Si & SMAN 1 Banuhampu.
+        2. Knowledge Hub: Materi interaktif terstruktur tentang energi alternatif.
+        3. Virtual Experiment: Simulator hibrida dengan perbaikan logika daya & cuaca.
+        4. Ice Breaking TTS: Versi diperluas (10x10) dengan navigasi otomatis dan validasi warna.
+        5. Laporan LKPD: Instrumen asesmen terpadu (PG, PGK, Essay) dengan fitur ekspor cetak PDF.
+    -->
+
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-emerald-900/10 no-print">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-emerald-800 rounded-lg flex items-center justify-center text-white font-bold">B</div>
+                    <span class="font-extrabold text-emerald-900 text-lg tracking-tight uppercase">SMA N 1 Banuhampu</span>
+                </div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="#materi" class="text-emerald-900/70 hover:text-emerald-900 transition font-bold text-xs uppercase tracking-widest">Materi</a>
+                    <a href="#simulasi" class="text-emerald-900/70 hover:text-emerald-900 transition font-bold text-xs uppercase tracking-widest">Simulasi</a>
+                    <a href="#tts" class="text-emerald-900/70 hover:text-emerald-900 transition font-bold text-xs uppercase tracking-widest">Ice Breaking</a>
+                    <a href="#lkpd" class="bg-emerald-800 text-white px-5 py-2 rounded-full hover:bg-emerald-900 transition text-xs font-bold uppercase tracking-widest">Asesmen</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="mb-12 text-center py-16 px-6 rounded-[3rem] hero-gradient text-white shadow-2xl relative">
+            <div class="relative z-10">
+                <span class="inline-block bg-amber-500/20 text-amber-300 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.3em] mb-6 border border-amber-500/30">
+                    Laporan Fisika Kelas X
+                </span>
+                <h1 class="text-4xl md:text-6xl font-extrabold mb-4 tracking-tighter leading-none">Energi Terbarukan:<br><span class="text-amber-400">Inovasi Masa Depan</span></h1>
+                <p class="text-lg font-medium text-emerald-100 max-w-xl mx-auto opacity-90">Dibimbing oleh: Novita Reni, S.Si</p>
+            </div>
+        </header>
+
+        <!-- Identitas Siswa -->
+        <section class="mb-12">
+            <div class="glass-card p-8 rounded-[2.5rem] border-t-8 border-amber-500 shadow-xl">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-[10px] font-black text-emerald-800 mb-2 uppercase tracking-widest">Nama Lengkap Siswa</label>
+                        <input type="text" placeholder="..." class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 font-bold outline-none focus:border-amber-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-emerald-800 mb-2 uppercase tracking-widest">Kelas & No. Absen</label>
+                        <input type="text" placeholder="..." class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 font-bold outline-none focus:border-amber-500 transition-all">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Materi Section -->
+        <section id="materi" class="mb-20">
+            <div class="flex items-center gap-4 mb-10">
+                <div class="h-12 w-2 bg-emerald-800 rounded-full"></div>
+                <div>
+                    <h2 class="text-3xl font-black text-emerald-950">Intisari Materi</h2>
+                    <p class="text-slate-500 text-sm">Landasan teoretis pemanfaatan energi ramah lingkungan.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="glass-card p-8 rounded-[2rem] hover:-translate-y-2 transition-transform border-b-4 border-emerald-600">
+                    <div class="text-3xl mb-4">🌱</div>
+                    <h3 class="font-black text-emerald-900 text-xs uppercase tracking-widest mb-3">Pengertian & Tujuan</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed">Energi alternatif adalah sumber energi yang berasal dari proses alam berkelanjutan. Tujuannya untuk mengurangi emisi karbon dan mencegah krisis energi fosil.</p>
+                </div>
+                <div class="glass-card p-8 rounded-[2rem] hover:-translate-y-2 transition-transform border-b-4 border-amber-500">
+                    <div class="text-3xl mb-4">⚡</div>
+                    <h3 class="font-black text-amber-700 text-xs uppercase tracking-widest mb-3">Ciri & Karakteristik</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed">Bersifat terbarukan (tidak habis), rendah polusi, namun produksinya fluktuatif (bergantung pada kondisi cuaca dan letak geografis).</p>
+                </div>
+                <div class="glass-card p-8 rounded-[2rem] hover:-translate-y-2 transition-transform border-b-4 border-blue-600">
+                    <div class="text-3xl mb-4">🔄</div>
+                    <h3 class="font-black text-blue-800 text-xs uppercase tracking-widest mb-3">Dampak & Tantangan</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed">Dampak positifnya adalah udara bersih. Tantangannya adalah biaya instalasi awal yang tinggi dan kebutuhan lahan yang luas.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Simulasi Section -->
+        <section id="simulasi" class="mb-20 bg-emerald-950 p-8 md:p-16 rounded-[4rem] text-white overflow-hidden shadow-2xl relative">
+            <div class="relative z-10">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-black mb-2">Simulator Hibrida Banuhampu</h2>
+                    <p class="text-emerald-300 text-sm italic">Uji kecukupan daya sekolah (Target 100 kW) di berbagai kondisi cuaca.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <div class="space-y-8">
+                        <div class="bg-white/10 backdrop-blur-sm p-6 rounded-3xl border border-white/10 no-print">
+                            <label class="block text-[10px] font-black text-amber-400 mb-4 uppercase tracking-[0.2em]">Pilih Kondisi Cuaca</label>
+                            <select id="weatherSim" onchange="updateSim()" class="w-full bg-emerald-900 border-2 border-emerald-800 rounded-xl p-4 font-bold outline-none cursor-pointer text-white">
+                                <option value="cerah">☀️ Cerah Berawan (Surya Optimal)</option>
+                                <option value="kabut">🌫️ Kabut Agam (Surya Menurun)</option>
+                                <option value="hujan">🌧️ Hujan Deras (Hidro Maksimal)</option>
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 no-print">
+                            <div class="bg-white/5 p-5 rounded-2xl border border-white/5 flex flex-col items-center">
+                                <span class="text-[9px] font-black uppercase text-amber-400 mb-3">Panel Surya</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="solarOn" onchange="updateSim()" checked>
+                                    <span class="slider solar"></span>
+                                </label>
+                                <span id="solarStatus" class="mt-2 text-[10px] font-bold text-white/50">ON</span>
+                            </div>
+                            <div class="bg-white/5 p-5 rounded-2xl border border-white/5 flex flex-col items-center">
+                                <span class="text-[9px] font-black uppercase text-sky-400 mb-3">Mikro Hidro</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="hydroOn" onchange="updateSim()" checked>
+                                    <span class="slider hydro"></span>
+                                </label>
+                                <span id="hydroStatus" class="mt-2 text-[10px] font-bold text-white/50">ON</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-emerald-900/50 p-8 rounded-3xl border border-white/10">
+                            <div class="flex justify-between items-end mb-4">
+                                <div>
+                                    <span class="text-[10px] font-black text-emerald-400 uppercase">Total Produksi</span>
+                                    <div class="text-5xl font-black"><span id="powerVal">0</span><small class="text-lg text-emerald-500 ml-2">kW</small></div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-[10px] font-black text-white/40 uppercase">Target</span>
+                                    <div class="text-xl font-bold text-white/80">100 kW</div>
+                                </div>
+                            </div>
+                            <div class="w-full bg-emerald-800/50 h-3 rounded-full overflow-hidden mb-6">
+                                <div id="powerBar" class="h-full bg-amber-500 transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                            <div id="simFeedback" class="text-xs bg-black/20 p-4 rounded-xl text-emerald-200 italic border-l-4 border-amber-500">Menganalisis sistem...</div>
+                        </div>
+                    </div>
+                    <div class="chart-container bg-white/5 p-6 rounded-3xl border border-white/5">
+                        <canvas id="simChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ice Breaking TTS -->
+        <section id="tts" class="mb-20 no-print">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-black text-emerald-950 uppercase tracking-tighter">Ice Breaking: Teka-Teki Silang</h2>
+                <p class="text-slate-500 text-sm mt-2 italic">Asah otak sebelum asesmen! Cek jawabanmu di akhir.</p>
+            </div>
+            
+            <div class="bg-emerald-50 rounded-[3rem] p-8 md:p-12 flex flex-col lg:flex-row gap-12 items-center">
+                <div id="ttsWrapper" class="tts-grid shadow-2xl"></div>
+                
+                <div class="flex-1 w-full space-y-6">
+                    <div class="bg-white p-8 rounded-[2.5rem] shadow-xl border border-emerald-100">
+                        <h4 class="font-black text-xs text-emerald-800 uppercase tracking-widest border-b pb-4 mb-4">Petunjuk TTS</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <p class="text-[10px] font-black text-amber-600 uppercase mb-2">Mendatar</p>
+                                <ul class="text-xs space-y-2 font-semibold text-slate-700">
+                                    <li><span class="text-emerald-700">1.</span> Energi dari radiasi matahari.</li>
+                                    <li><span class="text-emerald-700">3.</span> Energi dari pengolahan limbah organik.</li>
+                                    <li><span class="text-emerald-700">4.</span> Komponen pemutar generator listrik.</li>
+                                    <li><span class="text-emerald-700">6.</span> Bahan bakar tak terbarukan penyebab polusi.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-black text-sky-600 uppercase mb-2">Menurun</p>
+                                <ul class="text-xs space-y-2 font-semibold text-slate-700">
+                                    <li><span class="text-emerald-700">2.</span> Gas buang karbon hasil pembakaran.</li>
+                                    <li><span class="text-emerald-700">5.</span> Kabupaten lokasi SMAN 1 Banuhampu.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="mt-8 flex gap-4">
+                            <button onclick="checkTTS()" class="flex-1 bg-emerald-800 text-white py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-900 transition shadow-lg">Periksa Jawaban</button>
+                            <button onclick="resetTTS()" class="px-6 bg-slate-100 text-slate-400 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition">Reset</button>
+                        </div>
+                        <p id="ttsMsg" class="mt-4 text-center text-[10px] font-bold text-emerald-700 italic"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- LKPD Section -->
+        <section id="lkpd" class="mb-24">
+            <div class="text-center mb-16">
+                <span class="text-[10px] font-black text-amber-600 uppercase tracking-[0.4em]">Asesmen Sumatif</span>
+                <h2 class="text-4xl font-black text-emerald-950 mt-2">Lembar Kerja Peserta Didik</h2>
+                <div class="w-24 h-1.5 bg-emerald-800 mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <!-- PG Tunggal -->
+            <div class="glass-card p-10 rounded-[3rem] mb-10 shadow-lg">
+                <h3 class="text-sm font-black text-emerald-800 mb-8 uppercase tracking-widest flex items-center gap-4">
+                    <span class="w-10 h-10 bg-emerald-800 text-white rounded-xl flex items-center justify-center">01</span>
+                    Pilihan Ganda Tunggal
+                </h3>
+                <div class="space-y-10">
+                    <div class="question">
+                        <p class="font-bold text-slate-800 mb-5 leading-relaxed">1. Manakah dari pernyataan berikut yang merupakan alasan utama mengapa energi alternatif bersifat ramah lingkungan?</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <button onclick="markQuiz(this, true)" class="quiz-option">A. Rendah emisi gas rumah kaca saat operasional</button>
+                            <button onclick="markQuiz(this, false)" class="quiz-option">B. Biaya pembuatannya sangat murah bagi warga</button>
+                            <button onclick="markQuiz(this, false)" class="quiz-option">C. Teknologi yang digunakan sangat sederhana</button>
+                            <button onclick="markQuiz(this, false)" class="quiz-option">D. Tidak membutuhkan area tanah yang luas</button>
+                        </div>
+                    </div>
+                    <div class="question">
+                        <p class="font-bold text-slate-800 mb-5 leading-relaxed">2. Pemanfaatan gas metana dari kotoran ternak sebagai sumber energi disebut dengan...</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <button onclick="markQuiz(this, false)" class="quiz-option">A. Bio-diesel</button>
+                            <button onclick="markQuiz(this, true)" class="quiz-option">B. Biogas</button>
+                            <button onclick="markQuiz(this, false)" class="quiz-option">C. Geotermal</button>
+                            <button onclick="markQuiz(this, false)" class="quiz-option">D. Fotovoltaik</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PG Kompleks -->
+            <div class="glass-card p-10 rounded-[3rem] mb-10 shadow-lg border-l-8 border-amber-500">
+                <h3 class="text-sm font-black text-amber-700 mb-8 uppercase tracking-widest flex items-center gap-4">
+                    <span class="w-10 h-10 bg-amber-500 text-white rounded-xl flex items-center justify-center">02</span>
+                    Pilihan Ganda Kompleks
+                </h3>
+                <div class="question">
+                    <p class="font-bold text-slate-800 mb-6">3. Mengapa wilayah Kabupaten Agam sangat cocok untuk penerapan sistem energi hibrida (Surya + Mikrohidro)? (Pilih 2 jawaban benar)</p>
+                    <div class="space-y-4">
+                        <label class="flex items-center p-5 rounded-2xl border-2 border-slate-100 bg-slate-50/50 cursor-pointer hover:border-amber-400 transition">
+                            <input type="checkbox" class="w-5 h-5 mr-4 accent-amber-600">
+                            <span class="text-sm font-medium">Curah hujan tinggi mendukung debit air mikrohidro di musim hujan.</span>
+                        </label>
+                        <label class="flex items-center p-5 rounded-2xl border-2 border-slate-100 bg-slate-50/50 cursor-pointer hover:border-amber-400 transition">
+                            <input type="checkbox" class="w-5 h-5 mr-4 accent-amber-600">
+                            <span class="text-sm font-medium">Radiasi matahari selalu 100% stabil sepanjang tahun tanpa kabut.</span>
+                        </label>
+                        <label class="flex items-center p-5 rounded-2xl border-2 border-slate-100 bg-slate-50/50 cursor-pointer hover:border-amber-400 transition">
+                            <input type="checkbox" class="w-5 h-5 mr-4 accent-amber-600">
+                            <span class="text-sm font-medium">Kondisi geografis pegunungan menyediakan banyak aliran air deras.</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Essay -->
+            <div class="glass-card p-10 rounded-[3rem] shadow-lg border-l-8 border-emerald-800">
+                <h3 class="text-sm font-black text-emerald-800 mb-8 uppercase tracking-widest flex items-center gap-4">
+                    <span class="w-10 h-10 bg-emerald-800 text-white rounded-xl flex items-center justify-center">03</span>
+                    Analisis & Solusi
+                </h3>
+                <div class="space-y-10">
+                    <div>
+                        <p class="font-bold text-slate-800 mb-4 text-sm">4. Berdasarkan hasil simulasimu, apa yang terjadi pada produksi listrik sekolah jika terjadi hujan deras? Bagaimana mikrohidro membantu menutupi kelemahan panel surya?</p>
+                        <textarea class="w-full bg-slate-50 border-2 border-slate-100 rounded-[1.5rem] p-6 h-40 outline-none focus:border-emerald-700 font-medium text-sm transition-all" placeholder="Tuliskan analisis perbandingan dayamu di sini..."></textarea>
+                    </div>
+                    <div>
+                        <p class="font-bold text-slate-800 mb-4 text-sm">5. Tuliskan satu ide kreatif pemanfaatan biomassa di lingkungan kantin SMAN 1 Banuhampu!</p>
+                        <textarea class="w-full bg-slate-50 border-2 border-slate-100 rounded-[1.5rem] p-6 h-32 outline-none focus:border-emerald-700 font-medium text-sm transition-all" placeholder="Jelaskan langkah pengolahan sampahnya..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-16 text-center no-print">
+                <button id="printBtn" onclick="window.print()" class="px-12 py-5 bg-emerald-950 text-amber-400 font-black text-lg rounded-2xl shadow-2xl hover:scale-105 transition-all flex items-center mx-auto border-2 border-amber-500">
+                    <span class="mr-3 text-2xl">📄</span> CETAK LAPORAN (PDF)
+                </button>
+                <p class="mt-6 text-[10px] text-slate-400 font-bold uppercase tracking-widest">Diselesaikan oleh Siswa SMAN 1 Banuhampu • 2024</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-emerald-950 py-16 text-white text-center border-t-4 border-amber-500 no-print">
+        <div class="max-w-4xl mx-auto px-4">
+            <h4 class="font-black text-lg mb-2">SMAN 1 BANUHAMPU</h4>
+            <p class="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-8">Kabupaten Agam, Sumatera Barat</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-left border-t border-white/10 pt-8">
+                <div>
+                    <span class="text-[9px] font-black text-amber-500 uppercase">Guru Pengampu</span>
+                    <p class="font-bold text-emerald-50">Novita Reni, S.Si</p>
+                </div>
+                <div class="md:text-right">
+                    <span class="text-[9px] font-black text-amber-500 uppercase">Kurikulum</span>
+                    <p class="font-bold text-emerald-50">Fisika Terapan Fase E</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // TTS Configuration (Expanded 10x10)
+        const ttsData = {
+            grid: [
+                ['1','S','U','R','Y','A','','','',''], // SURYA (Row 0, Mendatar 1)
+                ['','E','','','','','','','',''],     // E (Row 1, Menurun 2)
+                ['3','B','I','O','G','A','S','','',''], // BIOGAS (Row 2, Mendatar 3)
+                ['','I','','','','','','','',''],     // I (Row 3, Menurun 2)
+                ['4','T','U','R','B','I','N','','',''], // TURBIN (Row 4, Mendatar 4)
+                ['','I','','5','','','','','',''],     // I (Row 5, Menurun 2), A (Row 5, Menurun 5)
+                ['','','','G','','','','','',''],     // G (Row 6, Menurun 5)
+                ['6','F','O','S','I','L','','','',''], // FOSIL (Row 7, Mendatar 6)
+                ['','','','A','','','','','',''],     // A (Row 8, Menurun 5)
+                ['','','','M','','','','','','']      // M (Row 9, Menurun 5)
+            ],
+            answers: [
+                ['','S','U','R','Y','A','','','',''],
+                ['','E','','','','','','','',''],
+                ['','B','I','O','G','A','S','','',''],
+                ['','I','','','','','','','',''],
+                ['','T','U','R','B','I','N','','',''],
+                ['','I','','A','','','','','',''],
+                ['','','','G','','','','','',''],
+                ['','F','O','S','I','L','','','',''],
+                ['','','','A','','','','','',''],
+                ['','','','M','','','','','','']
+            ],
+            active: [
+                [0,1,1,1,1,1,0,0,0,0],
+                [0,1,0,0,0,0,0,0,0,0],
+                [0,1,1,1,1,1,1,0,0,0],
+                [0,1,0,0,0,0,0,0,0,0],
+                [0,1,1,1,1,1,1,0,0,0],
+                [0,1,0,1,0,0,0,0,0,0],
+                [0,0,0,1,0,0,0,0,0,0],
+                [0,1,1,1,1,1,0,0,0,0],
+                [0,0,0,1,0,0,0,0,0,0],
+                [0,0,0,1,0,0,0,0,0,0]
+            ]
+        };
+
+        function initTTS() {
+            const wrapper = document.getElementById('ttsWrapper');
+            for(let r=0; r<10; r++) {
+                for(let c=0; c<10; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = ttsData.active[r][c] ? 'tts-cell' : 'tts-cell black';
+                    
+                    if(ttsData.active[r][c]) {
+                        const input = document.createElement('input');
+                        input.className = 'tts-input';
+                        input.maxLength = 1;
+                        input.dataset.row = r;
+                        input.dataset.col = c;
+                        
+                        input.addEventListener('keyup', (e) => {
+                            if(e.target.value.length === 1) focusNext(r, c);
+                            if(e.key === 'Backspace') focusPrev(r, c);
+                        });
+                        cell.appendChild(input);
+                    }
+
+                    // Add Labels
+                    if(r===0 && c===0) cell.innerHTML = '<span class="absolute top-0 left-0.5 text-[7px] text-amber-600 font-black">1</span>';
+                    if(r===0 && c===1) cell.innerHTML += '<span class="absolute top-0 right-0.5 text-[7px] text-sky-600 font-black">2</span>';
+                    if(r===2 && c===0) cell.innerHTML = '<span class="absolute top-0 left-0.5 text-[7px] text-amber-600 font-black">3</span>';
+                    if(r===4 && c===0) cell.innerHTML = '<span class="absolute top-0 left-0.5 text-[7px] text-amber-600 font-black">4</span>';
+                    if(r===5 && c===3) cell.innerHTML = '<span class="absolute top-0 left-0.5 text-[7px] text-sky-600 font-black">5</span>';
+                    if(r===7 && c===0) cell.innerHTML = '<span class="absolute top-0 left-0.5 text-[7px] text-amber-600 font-black">6</span>';
+
+                    wrapper.appendChild(cell);
+                }
+            }
+        }
+
+        function focusNext(r, c) {
+            const all = Array.from(document.querySelectorAll('.tts-input'));
+            const idx = all.findIndex(i => i.dataset.row == r && i.dataset.col == c);
+            if(idx < all.length - 1) all[idx + 1].focus();
+        }
+
+        function focusPrev(r, c) {
+            const all = Array.from(document.querySelectorAll('.tts-input'));
+            const idx = all.findIndex(i => i.dataset.row == r && i.dataset.col == c);
+            if(idx > 0) all[idx - 1].focus();
+        }
+
+        function checkTTS() {
+            const inputs = document.querySelectorAll('.tts-input');
+            let correct = 0;
+            inputs.forEach(inp => {
+                const r = inp.dataset.row;
+                const c = inp.dataset.col;
+                if(inp.value.toUpperCase() === ttsData.answers[r][c]) {
+                    inp.style.backgroundColor = "#dcfce7";
+                    inp.style.color = "#166534";
+                    correct++;
+                } else {
+                    inp.style.backgroundColor = "#fee2e2";
+                    inp.style.color = "#991b1b";
+                }
+            });
+            document.getElementById('ttsMsg').innerText = `Skor: ${correct}/${inputs.length} benar!`;
+        }
+
+        function resetTTS() {
+            document.querySelectorAll('.tts-input').forEach(i => {
+                i.value = '';
+                i.style.backgroundColor = 'transparent';
+                i.style.color = '#064e3b';
+            });
+            document.getElementById('ttsMsg').innerText = '';
+        }
+
+        // Simulator Config
+        const ctx = document.getElementById('simChart').getContext('2d');
+        let simChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Surya', 'Hidro', 'Total'],
+                datasets: [{
+                    label: 'Produksi (kW)',
+                    data: [0, 0, 0],
+                    backgroundColor: ['#d97706', '#0369a1', '#065f46'],
+                    borderRadius: 10,
+                    barThickness: 50
+                }, {
+                    label: 'Target (100 kW)',
+                    data: [100, 100, 100],
+                    type: 'line',
+                    borderColor: '#ef4444',
+                    borderDash: [5, 5],
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true, max: 200, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#fff' } }, x: { ticks: { color: '#fff' } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        function updateSim() {
+            const weather = document.getElementById('weatherSim').value;
+            const solarOn = document.getElementById('solarOn').checked;
+            const hydroOn = document.getElementById('hydroOn').checked;
+            
+            document.getElementById('solarStatus').innerText = solarOn ? "ON" : "OFF";
+            document.getElementById('hydroStatus').innerText = hydroOn ? "ON" : "OFF";
+
+            let sVal = 0, hVal = 0;
+            if(solarOn) {
+                if(weather === 'cerah') sVal = 120;
+                else if(weather === 'kabut') sVal = 40;
+                else sVal = 5;
+            }
+            if(hydroOn) {
+                if(weather === 'cerah') hVal = 40;
+                else if(weather === 'kabut') hVal = 60;
+                else hVal = 140;
+            }
+
+            const total = sVal + hVal;
+            document.getElementById('powerVal').innerText = total;
+            document.getElementById('powerBar').style.width = Math.min((total/100)*100, 100) + "%";
+            document.getElementById('powerBar').style.backgroundColor = total >= 100 ? "#10b981" : "#f59e0b";
+            
+            let feedback = total >= 100 ? `✅ Berhasil! Target 100 kW terpenuhi dengan surplus ${total-100} kW.` : `⚠️ Kurang! Pasokan listrik defisit ${100-total} kW.`;
+            document.getElementById('simFeedback').innerText = feedback;
+
+            simChart.data.datasets[0].data = [sVal, hVal, total];
+            simChart.update();
+        }
+
+        function markQuiz(btn, isCorrect) {
+            const parent = btn.parentElement;
+            parent.querySelectorAll('.quiz-option').forEach(b => b.classList.remove('correct-ans', 'wrong-ans'));
+            btn.classList.add(isCorrect ? 'correct-ans' : 'wrong-ans');
+        }
+
+        window.onload = () => {
+            initTTS();
+            updateSim();
+        };
+    </script>
+
+    <!-- Placeholder Comments Required -->
+    <!-- Visualization & Content Choices: 
+        1. Material Cards -> Inform -> Dynamic Layout -> Intuitive structure for learning.
+        2. Hybrid Simulator -> Analyze -> Bar/Line Chart (Chart.js) -> Toggle inputs & weather dropdown -> Justification: Shows interdependence of renewable sources.
+        3. Interactive TTS -> Ice Breaking -> 10x10 Grid -> Auto-focus & color validation -> Increases engagement before assessment.
+        4. Assessment (LKPD) -> Test -> PG/PGK/Essay -> Print-to-PDF ready.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</body>
+</html>
